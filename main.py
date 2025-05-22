@@ -5,7 +5,7 @@ from ghost import Ghost
 from menu import show_menu, show_game_over
 
 # Set frame rate for the game
-FPS = 5
+FPS = 20
 
 # Game states
 MENU = "menu"

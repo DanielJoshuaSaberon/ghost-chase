@@ -3,88 +3,91 @@ import tracemalloc
 import psutil
 import os
 from pathfinding import a_star
-from maze import MAZE, ROWS, COLS
+from maze import ROWS, COLS
 
 def measure_computation_time(start, goal, iterations=100):
     """
-    Measures the average time taken by the A* algorithm to find a path
-    from 'start' to 'goal' over a specified number of iterations.
+    Measures the average execution time of the A* pathfinding algorithm over multiple iterations.
 
     Args:
-        start (tuple): Starting coordinate (row, col).
-        goal (tuple): Goal coordinate (row, col).
-        iterations (int): Number of times to run the test to average time.
+        start (tuple): Coordinates of the starting node in the grid (row, col).
+        goal (tuple): Coordinates of the goal node in the grid (row, col).
+        iterations (int): Number of repetitions for averaging to mitigate timing variability.
 
     Returns:
-        float: Average computation time in milliseconds.
-        list: The last path found by A* (list of coordinates).
+        float: Average computation time per run in milliseconds.
+        list: Path returned from the last A* execution (sequence of grid nodes).
     """
     total_time = 0
     for _ in range(iterations):
-        start_time = time.perf_counter()  # Start high precision timer
-        path = a_star(start, goal)         # Run the A* pathfinding algorithm
-        end_time = time.perf_counter()    # Stop timer after completion
-        total_time += (end_time - start_time)  # Accumulate total elapsed time
+        start_time = time.perf_counter()  # High-resolution timer to capture precise elapsed time
+        path = a_star(start, goal)         # Execute A* algorithm for path calculation
+        end_time = time.perf_counter()    # End timer immediately after path is found
+        total_time += (end_time - start_time)  # Aggregate cumulative duration for all runs
 
-    avg_time_ms = (total_time / iterations) * 1000  # Convert average time to milliseconds
+    avg_time_ms = (total_time / iterations) * 1000  # Convert average time from seconds to milliseconds
     return avg_time_ms, path
 
 
 def check_path_optimality(path, start, goal):
     """
-    Validates the optimality of the found path by comparing its length
-    to the expected Manhattan distance between start and goal.
+    Assesses path optimality by comparing the A*-computed path length to the theoretical shortest distance.
+
+    The metric used is the Manhattan distance, which represents the minimum possible path length
+    on a grid without obstacles, considering only horizontal and vertical moves.
 
     Args:
-        path (list): List of coordinates representing the path.
-        start (tuple): Starting coordinate (row, col).
-        goal (tuple): Goal coordinate (row, col).
+        path (list): Ordered list of nodes representing the computed path.
+        start (tuple): Start node coordinates.
+        goal (tuple): Goal node coordinates.
 
     Returns:
-        bool: True if path length equals Manhattan distance + 1 (inclusive), False otherwise.
+        bool: True if the path length matches the Manhattan distance plus one (including start node),
+              indicating an optimal path; False otherwise.
     """
     if not path:
-        return False  # No path found means path is not optimal
+        return False  # No path found indicates failure or unsolvability, hence non-optimal
 
-    # Calculate Manhattan distance (minimum steps in a grid without obstacles)
+    # Manhattan distance calculation: sum of absolute differences of row and column indices
     expected_length = abs(start[0] - goal[0]) + abs(start[1] - goal[1]) + 1
-    # Path is optimal if its length equals the Manhattan distance plus 1 (including start node)
+    # Path length includes all nodes traversed, so optimal if equal to expected minimal distance + start node
     return len(path) == expected_length
 
 
 def measure_resource_utilization(start, goal):
     """
-    Measures the CPU and memory usage during a single run of the A* algorithm.
+    Profiles system resource consumption during a single execution of the A* pathfinding algorithm.
 
-    Uses 'tracemalloc' to track memory allocations and 'psutil' to measure CPU usage percentage.
+    Utilizes Python's 'tracemalloc' to trace memory allocations and peak memory footprint,
+    and 'psutil' to capture CPU usage statistics specifically for the current Python process.
 
     Args:
-        start (tuple): Starting coordinate (row, col).
-        goal (tuple): Goal coordinate (row, col).
+        start (tuple): Starting node coordinates.
+        goal (tuple): Goal node coordinates.
 
     Returns:
-        float: Approximate CPU usage percentage during the run.
-        float: Current memory usage in kilobytes.
-        float: Peak memory usage in kilobytes during the run.
-        list: The path found by A* (list of coordinates).
+        float: Percentage of CPU utilization attributed to the A* execution.
+        float: Current memory usage in kilobytes at the time of measurement.
+        float: Peak memory usage in kilobytes during the pathfinding run.
+        list: The computed path from start to goal.
     """
-    tracemalloc.start()                     # Begin memory allocation tracking
-    process = psutil.Process(os.getpid())  # Get process handle for CPU measurement
+    tracemalloc.start()                     # Initiate memory tracking to monitor allocations during runtime
+    process = psutil.Process(os.getpid())  # Obtain process object for accurate CPU usage measurement
 
-    cpu_before = process.cpu_percent(interval=None)  # CPU usage before pathfinding
+    cpu_before = process.cpu_percent(interval=None)  # Record CPU usage baseline before pathfinding begins
 
-    path = a_star(start, goal)              # Execute pathfinding algorithm
+    path = a_star(start, goal)              # Run A* pathfinding algorithm (compute shortest path)
 
-    cpu_after = process.cpu_percent(interval=0.1)   # Measure CPU usage shortly after
+    cpu_after = process.cpu_percent(interval=0.1)   # Sample CPU usage after a short interval post-execution
 
-    current_mem, peak_mem = tracemalloc.get_traced_memory()  # Get memory usage stats
+    current_mem, peak_mem = tracemalloc.get_traced_memory()  # Retrieve current and peak memory allocation snapshots
 
-    tracemalloc.stop()                      # Stop memory tracking
+    tracemalloc.stop()                      # Terminate memory tracking to conserve resources
 
-    # Calculate approximate CPU usage during pathfinding run
+    # Calculate approximate CPU utilization by subtracting baseline from post-execution sample
     cpu_usage = cpu_after - cpu_before
 
-    # Convert memory usage from bytes to kilobytes for readability
+    # Convert bytes to kilobytes (KB) for easier interpretation of memory usage metrics
     mem_usage_kb = current_mem / 1024
     peak_mem_kb = peak_mem / 1024
 
@@ -93,17 +96,19 @@ def measure_resource_utilization(start, goal):
 
 def get_start_goal(rows, cols):
     """
-    Returns predefined start and goal coordinates based on maze size.
+    Provides predefined start and goal node coordinates adapted to different maze dimensions.
+
+    This ensures consistent test conditions across maze sizes and facilitates scalable evaluation.
 
     Args:
-        rows (int): Number of rows in the maze.
-        cols (int): Number of columns in the maze.
+        rows (int): Number of rows in the maze grid.
+        cols (int): Number of columns in the maze grid.
 
     Returns:
-        tuple: Start coordinate (row, col).
-        tuple: Goal coordinate (row, col).
+        tuple: Start node coordinates (row, col).
+        tuple: Goal node coordinates (row, col).
     """
-    # Customize start/goal positions based on maze dimensions
+    # Assign test positions that avoid maze borders and provide reasonable path lengths
     if rows == 10 and cols == 10:
         return (1, 1), (8, 8)
     elif rows == 15 and cols == 15:
@@ -111,29 +116,27 @@ def get_start_goal(rows, cols):
     elif rows == 20 and cols == 20:
         return (1, 1), (18, 18)
     else:
-        # Default positions for unknown maze sizes
+        # Generic fallback: start near top-left, goal near bottom-right, avoiding edges
         return (1, 1), (rows - 2, cols - 2)
 
 
 def run_tests():
     """
-    Runs all performance tests on the A* algorithm for the current maze size.
-    Prints average computation time, path optimality, CPU usage, and memory usage.
+    Coordinates execution of the A* performance and resource profiling tests,
+    displaying detailed outputs for computational efficiency and pathfinding quality.
+
+    Tests are contextualized to the current maze dimensions provided by global settings.
     """
-    # Get start and goal positions dynamically based on maze size
     start, goal = get_start_goal(ROWS, COLS)
 
     print(f"Running A* performance tests on maze size {ROWS}x{COLS}...\n")
 
-    # Measure average computation time over multiple runs
     avg_time, path = measure_computation_time(start, goal)
     print(f"Average computation time over 100 runs: {avg_time:.3f} ms")
 
-    # Validate path optimality
     optimal = check_path_optimality(path, start, goal)
     print(f"Path optimality test: {'PASS' if optimal else 'FAIL'}")
 
-    # Measure CPU and memory usage during one A* run
     cpu, mem_current, mem_peak, _ = measure_resource_utilization(start, goal)
     print(f"CPU usage during pathfinding: {cpu:.2f}%")
     print(f"Memory usage (current): {mem_current:.2f} KB")
