@@ -1,5 +1,4 @@
 from maze import MAZE, ROWS, COLS
-from collections import deque
 
 
 # Heuristic function for A* (Manhattan distance)
@@ -62,39 +61,10 @@ def a_star(start, goal):
     return []
 
 
-# Breadth-First Search algorithm implementation (for comparison/testing)
-def bfs(start, goal):
-    queue = deque([start])  # FIFO queue for BFS
-    came_from = {start: None}
-
-    while queue:
-        current = queue.popleft()
-
-        # If reached goal, reconstruct path and return
-        if current == goal:
-            path = []
-            while current is not None:
-                path.append(current)
-                current = came_from[current]
-            path.reverse()
-            return path
-
-        # Visit all unvisited neighbors
-        for next_node in neighbors(current):
-            if next_node not in came_from:
-                came_from[next_node] = current
-                queue.append(next_node)
-
-    # No path found
-    return []
-
-
 # Selector function to choose which algorithm to use
 def find_path(start, goal, algorithm="a_star"):
     if algorithm == "a_star":
         return a_star(start, goal)
-    elif algorithm == "bfs":
-        return bfs(start, goal)
     else:
         # Raise error if unknown algorithm requested
         raise ValueError(f"Unknown algorithm: {algorithm}")

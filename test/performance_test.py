@@ -95,27 +95,6 @@ def measure_resource_utilization(start, goal):
 
 
 def get_start_goal(rows, cols):
-    """
-    Provides predefined start and goal node coordinates adapted to different maze dimensions.
-
-    This ensures consistent test conditions across maze sizes and facilitates scalable evaluation.
-
-    Args:
-        rows (int): Number of rows in the maze grid.
-        cols (int): Number of columns in the maze grid.
-
-    Returns:
-        tuple: Start node coordinates (row, col).
-        tuple: Goal node coordinates (row, col).
-    """
-    # Assign test positions that avoid maze borders and provide reasonable path lengths
-    if rows == 10 and cols == 10:
-        return (1, 1), (8, 8)
-    elif rows == 15 and cols == 15:
-        return (1, 1), (13, 13)
-    elif rows == 20 and cols == 20:
-        return (1, 1), (18, 18)
-    else:
         # Generic fallback: start near top-left, goal near bottom-right, avoiding edges
         return (1, 1), (rows - 2, cols - 2)
 
