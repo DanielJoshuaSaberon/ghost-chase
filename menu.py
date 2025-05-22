@@ -44,13 +44,14 @@ def show_menu(win):
                 running = False  # Exit the menu loop
 
 
-def show_game_over(win):
+def show_game_over(win, escaped=False):
     """
     Displays the game over screen with selectable options.
     Allows the player to choose between retrying the game or quitting to the menu.
 
     Args:
         win (pygame.Surface): The pygame window surface to draw on
+        escaped (bool): Whether the player escaped or was caught
 
     Returns:
         str: The selected option ("Retry" or "Quit to Menu")
@@ -73,7 +74,12 @@ def show_game_over(win):
     # Game over menu loop
     while True:
         win.fill(BG_COLOR)  # Clear screen
-        draw_text(win, "Game Over! The ghost caught you.", (255, 0, 0), 30, -60)  # Title message
+
+        # Show winning or losing message based on escape status
+        if escaped:
+            draw_text(win, "Successfully Escaped!", (0, 255, 0), 30, -60)  # Green success message
+        else:
+            draw_text(win, "Game Over! The ghost caught you.", (255, 0, 0), 30, -60)  # Red fail message
 
         # Draw all menu options, highlighting the selected one
         for i, option in enumerate(options):

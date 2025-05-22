@@ -5,7 +5,7 @@ from ghost import Ghost
 from menu import show_menu, show_game_over
 
 # Frames per second (FPS) controls game speed and update rate
-FPS = 20
+FPS = 30
 
 # Define possible game states as constants
 MENU = "menu"
@@ -16,8 +16,8 @@ def game_loop(win):
     Main game loop where all the game logic runs:
     - Handles player input (arrow keys)
     - Updates ghost movement using A* pathfinding
-    - Detects collisions between player and ghost
-    - Draws the maze, player, ghost, and UI elements
+    - Detects collisions between player and ghost or time running out
+    - Draws the maze, player, ghost, timer, and UI elements
     - Handles the game over screen and restart/quit options
 
     Args:
@@ -27,68 +27,94 @@ def game_loop(win):
         str: Next game state ("game" to restart, or "menu" to quit)
     """
     clock = pygame.time.Clock()  # Clock to control FPS
-    player = Player(1, 1)  # Initialize player near top-left corner (row=1, col=1)
-    ghost = Ghost(ROWS - 2, COLS - 2)  # Initialize ghost near bottom-right corner
-    frame_count = 0  # Frame counter to control ghost movement speed
-    ghost_move_delay = 3  # Ghost moves once every 3 frames to slow it down
-    game_over = False  # Flag to track if the player is caught by ghost
+    player = Player(1, 1)  # Initialize player
+    ghost = Ghost(ROWS - 2, COLS - 2)  # Initialize ghost
+    frame_count = 0
+    ghost_move_delay = 4  # Increased delay to slow down ghost movement
+    player_move_delay = 3  # New delay for slowing down player movement
+    last_player_move_frame = 0
+    game_over = False
+    reason = "caught"  # Default reason for game over
+    escaped = False  # Flag to track if player escaped
 
-    # Main game loop (runs every frame)
+    # Timer setup: 20 seconds countdown
+    total_time = 20  # seconds
+    start_ticks = pygame.time.get_ticks()  # Start time in milliseconds
+
+    font = pygame.font.SysFont("Arial", 24)  # Font for displaying timer
+
     while True:
-        clock.tick(FPS)  # Limit loop to run at FPS times per second
-        frame_count += 1  # Increment frame counter
+        clock.tick(FPS)
+        frame_count += 1
 
-        # Event handling loop: processes system and user input events
+        # Calculate remaining time
+        seconds_passed = (pygame.time.get_ticks() - start_ticks) // 1000
+        time_left = max(0, total_time - seconds_passed)
+
+        # Game over if time runs out
+        if time_left == 0 and not game_over:
+            game_over = True
+            reason = "escaped"  # Player survived
+            escaped = True  # Set escaped flag to True
+            pygame.mixer.music.stop()
+            pygame.mixer.music.load("public/victory.mp3")  # Optional: use a win sound
+            pygame.mixer.music.play()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                # Player clicked window close button -> return to menu to exit game
                 return MENU
 
-        # Handle player input only if game is not over
-        keys = pygame.key.get_pressed()  # Get current key states
+        keys = pygame.key.get_pressed()
         if not game_over:
-            # Check arrow keys and move player accordingly
-            if keys[pygame.K_UP]:
-                player.move(-1, 0)  # Move player one tile up
-            elif keys[pygame.K_DOWN]:
-                player.move(1, 0)   # Move player one tile down
-            elif keys[pygame.K_LEFT]:
-                player.move(0, -1)  # Move player one tile left
-            elif keys[pygame.K_RIGHT]:
-                player.move(0, 1)   # Move player one tile right
+            # Slow down player movement
+            if frame_count - last_player_move_frame >= player_move_delay:
+                if keys[pygame.K_UP]:
+                    player.move(-1, 0)
+                    last_player_move_frame = frame_count
+                elif keys[pygame.K_DOWN]:
+                    player.move(1, 0)
+                    last_player_move_frame = frame_count
+                elif keys[pygame.K_LEFT]:
+                    player.move(0, -1)
+                    last_player_move_frame = frame_count
+                elif keys[pygame.K_RIGHT]:
+                    player.move(0, 1)
+                    last_player_move_frame = frame_count
 
-            # Update ghost movement only every 'ghost_move_delay' frames for pacing
+            # Slow down ghost movement
             if frame_count % ghost_move_delay == 0:
-                ghost.update(player)  # Ghost finds path and moves toward player
+                ghost.update(player)
 
-            # Check collision: if ghost occupies same grid tile as player
             if ghost.row == player.row and ghost.col == player.col:
-                game_over = True  # Set game over flag
-                pygame.mixer.music.stop()  # Stop background music
-                pygame.mixer.music.load("public/gameover.wav")  # Load game over sound
-                pygame.mixer.music.play()  # Play game over sound
+                game_over = True
+                reason = "caught"  # Player was caught
+                escaped = False  # Set escaped flag to False
+                pygame.mixer.music.stop()
+                pygame.mixer.music.load("public/gameover.wav")
+                pygame.mixer.music.play()
 
-        # Drawing section — render everything on screen
-        win.fill((0, 0, 0))    # Clear the screen to black before drawing new frame
-        draw_maze(win)         # Draw maze walls and paths
-        player.draw(win)       # Draw player sprite or shape
-        ghost.draw(win)        # Draw ghost sprite or shape
+        win.fill((0, 0, 0))
+        draw_maze(win)
+        player.draw(win)
+        ghost.draw(win)
 
-        # If the game is over, show the game over screen and wait for user input
+        # Draw countdown timer at top-left
+        timer_text = font.render(f"Time Left: {time_left}s", True, (255, 255, 0))
+        win.blit(timer_text, (10, 10))
+
+        # If the game is over, show game over screen with reason
         if game_over:
-            choice = show_game_over(win)  # Display game over menu and get selection
-            pygame.mixer.music.stop()  # Stop game over music
-            pygame.mixer.music.load("public/bgMusic.mp3")  # Reload background music
-            pygame.mixer.music.play(-1)  # Play background music in loop
+            choice = show_game_over(win, escaped)  # Pass reason to determine message
+            pygame.mixer.music.stop()
+            pygame.mixer.music.load("public/bgMusic.mp3")
+            pygame.mixer.music.play(-1)
 
             if choice == "Retry":
-                return GAME  # Restart game
+                return GAME
             elif choice == "Quit to Menu":
-                return MENU  # Quit to menu
+                return MENU
 
-        # Update the full display surface to the screen
         pygame.display.update()
-
 
 
 def main():
