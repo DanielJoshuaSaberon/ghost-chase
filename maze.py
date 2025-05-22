@@ -3,17 +3,16 @@ import pygame
 # Size of each tile in pixels (width and height of each maze cell)
 TILE_SIZE = 50
 
-# Maze dimensions: 15 rows and 15 columns, making it a 15x15 grid
-ROWS, COLS = 20, 20
-
 # Colors used for drawing the maze tiles
 BG_COLOR = (0, 0, 0)  # Black color for empty spaces where player and ghost can move
 WALL_COLOR = (0, 0, 255)  # Blue color for walls that block movement
 
+# Maze dimensions: 15 rows and 15 columns, making it a 15x15 grid
+ROWS, COLS = 20, 20
+
 # Maze layout as a 2D list (15 rows x 15 columns)
 # 1 represents a wall (impassable tile)
 # 0 represents a path (walkable tile)
-
 # 20X20
 MAZE = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],

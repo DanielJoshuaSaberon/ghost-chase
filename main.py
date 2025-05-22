@@ -12,29 +12,26 @@ MENU = "menu"
 GAME = "game"
 
 def game_loop(win):
-    """
-    Main game loop where all the game logic runs:
-    - Handles player input (arrow keys)
-    - Updates ghost movement using A* pathfinding
-    - Detects collisions between player and ghost or time running out
-    - Draws the maze, player, ghost, timer, and UI elements
-    - Handles the game over screen and restart/quit options
+    #Main game loop where all the game logic runs:
+        #Handles player input (arrow keys)
+        #Updates ghost movement using A* pathfinding
+        #Detects collisions between player and ghost or time running out
+        #Draws the maze, player, ghost, timer, and UI elements
+        #Handles the game over screen and restart/quit options
+    #Args:
+        #win (pygame.Surface): The pygame window surface to draw on
 
-    Args:
-        win (pygame.Surface): The pygame window surface to draw on
+    #Returns:
+        #str: Next game state ("game" to restart, or "menu" to quit)
 
-    Returns:
-        str: Next game state ("game" to restart, or "menu" to quit)
-    """
     clock = pygame.time.Clock()  # Clock to control FPS
-    player = Player(1, 1)  # Initialize player
-    ghost = Ghost(ROWS - 2, COLS - 2)  # Initialize ghost
+    player = Player(1, 1)  # Initialize player position
+    ghost = Ghost(ROWS - 2, COLS - 2)  # Initialize ghost position
     frame_count = 0
-    ghost_move_delay = 4  # Increased delay to slow down ghost movement
-    player_move_delay = 3  # New delay for slowing down player movement
+    ghost_move_delay = 6   #  delay to slow down ghost movement
+    player_move_delay = 2  #  delay for slowing down player movement
     last_player_move_frame = 0
     game_over = False
-    reason = "caught"  # Default reason for game over
     escaped = False  # Flag to track if player escaped
 
     # Timer setup: 20 seconds countdown
@@ -54,7 +51,6 @@ def game_loop(win):
         # Game over if time runs out
         if time_left == 0 and not game_over:
             game_over = True
-            reason = "escaped"  # Player survived
             escaped = True  # Set escaped flag to True
             pygame.mixer.music.stop()
             pygame.mixer.music.load("public/victory.mp3")  # Optional: use a win sound
@@ -87,7 +83,6 @@ def game_loop(win):
 
             if ghost.row == player.row and ghost.col == player.col:
                 game_over = True
-                reason = "caught"  # Player was caught
                 escaped = False  # Set escaped flag to False
                 pygame.mixer.music.stop()
                 pygame.mixer.music.load("public/gameover.wav")
@@ -153,7 +148,7 @@ def main():
                         pygame.quit()  # Cleanly exit pygame
                         return          # Quit the program
 
-                    # If spacebar pressed, start the game
+                    # If space-bar pressed, start the game
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                         state = GAME
                         break  # Exit menu loop and start gameplay

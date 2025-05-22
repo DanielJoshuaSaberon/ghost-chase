@@ -18,6 +18,7 @@ def measure_computation_time(start, goal, iterations=100):
         float: Average computation time per run in milliseconds.
         list: Path returned from the last A* execution (sequence of grid nodes).
     """
+
     total_time = 0
     for _ in range(iterations):
         start_time = time.perf_counter()  # High-resolution timer to capture precise elapsed time

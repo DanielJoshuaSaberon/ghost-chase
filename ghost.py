@@ -56,12 +56,9 @@ class Ghost:
             self.row, self.col = next_node
 
     def draw(self, win):
-        """
-        Draw the ghost's image on the game window at its current position.
-
-        Args:
-            win (pygame.Surface): The surface (window) to draw the ghost image on.
-        """
+        #Draw the ghost's image on the game window at its current position.
+        #Args:
+            #win (pygame.Surface): The surface (window) to draw the ghost image on.
         # Calculate the pixel position (top-left corner) of the ghost based on
         # its grid coordinates and the tile size. Multiplying col by TILE_SIZE
         # gives the x position, and row by TILE_SIZE gives the y position.

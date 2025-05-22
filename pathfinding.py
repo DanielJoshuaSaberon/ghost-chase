@@ -1,70 +1,81 @@
 from maze import MAZE, ROWS, COLS
 
 
-# Heuristic function for A* (Manhattan distance)
-def heuristic(a, b):
-    # Calculate the Manhattan distance between points a and b
-    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+# Heuristic function to estimate cost from current position to the goal
+def manhattan_distance(point_a, point_b):
+    #Calculate the Manhattan distance between two points on a grid.
+    #Manhattan distance is to estimate how far two points are from each other on a grid
+    #This distance is the sum of horizontal and vertical moves needed.
+
+      #1     #2    #(1,2)
+    row_a, col_a = point_a
+      #2     #3    #(2,3)
+    row_b, col_b = point_b
+    return abs(row_a - row_b) + abs(col_a - col_b)
 
 
-# Returns walkable neighboring cells of a given node
-def neighbors(node):
-    row, col = node
-    results = []
-    # Check up, down, left, right neighbors
-    for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-        r, c = row + dr, col + dc
-        # Check if neighbor is inside maze boundaries
-        if 0 <= r < ROWS and 0 <= c < COLS:
-            # Check if neighbor cell is walkable (0 means empty)
-            if MAZE[r][c] == 0:
-                results.append((r, c))
-    return results
+# Function to get all walkable neighbor cells (up, down, left, right)
+def get_walkable_neighbors(current_cell):
+    #Find all neighboring cells of current_cell that can be walked on.
+    #Args:
+        #current_cell (tuple): (row, col) of the current position
+    #Returns:
+        #list of tuples: Each tuple is a walkable neighboring cell (row, col)
+                                # 2,1
+    current_row, current_col = current_cell
+    neighbors_list = []
+
+    # Possible directions to move: left, right, down, rup
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+           #-1           #0           #-1,0
+    for row_offset, col_offset in directions:
+             #1            #2           #-1
+        neighbor_row = current_row + row_offset
+             #1             #1           #0
+        neighbor_col = current_col + col_offset
+
+        # Check if neighbor is inside the maze boundaries
+        if 0 <= neighbor_row < ROWS and 0 <= neighbor_col < COLS:
+            # Check if the neighbor cell/Actual value is 0 then it is an empty path
+            if MAZE[neighbor_row][neighbor_col] == 0:
+                neighbors_list.append((neighbor_row, neighbor_col))
+
+    return neighbors_list
 
 
-# A* pathfinding algorithm implementation
+# A* algorithm to find the shortest path from start to goal in a maze
 def a_star(start, goal):
-    # frontier holds tuples of (priority, cost_so_far, node)
-    frontier = []
-    frontier.append((heuristic(start, goal), 0, start))
+    # List of cells to check: (priority, cost_so_far, current_cell)
+    toBeExplored = [(manhattan_distance(start, goal), 0, start)]
 
-    # Dictionaries to track path and costs
+    # Track how we got to each cell
     came_from = {start: None}
+    # Track cost to reach each cell
     cost_so_far = {start: 0}
 
-    while frontier:
-        # Sort frontier to get the node with lowest priority (f = g + h)
-        frontier.sort()
-        _, cost, current = frontier.pop(0)
+    while toBeExplored:
+        # Pick cell with lowest total estimated cost
+        toBeExplored.sort()
+        x, cost, current = toBeExplored.pop(0)
 
-        # If reached goal, reconstruct path and return it
+        # Goal reached, build path
         if current == goal:
             path = []
-            while current is not None:
+            while current:
                 path.append(current)
                 current = came_from[current]
-            path.reverse()  # Reverse path from start to goal
-            return path
+            return path[::-1]  # Reverse path
 
-        # Explore neighbors
-        for next_node in neighbors(current):
-            new_cost = cost_so_far[current] + 1  # Cost to move to neighbor (assumed 1)
-            # If neighbor is not visited or found a cheaper path
-            if next_node not in cost_so_far or new_cost < cost_so_far[next_node]:
-                cost_so_far[next_node] = new_cost
-                # Calculate priority = cost_so_far + heuristic (estimated distance)
-                priority = new_cost + heuristic(next_node, goal)
-                frontier.append((priority, new_cost, next_node))
-                came_from[next_node] = current
+        # Check neighbors of the current cell
+        for neighbor in get_walkable_neighbors(current):
+            new_cost = cost + 1  # Assume each move costs 1
+
+            if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
+                cost_so_far[neighbor] = new_cost
+                priority = new_cost + manhattan_distance(neighbor, goal)
+                toBeExplored.append((priority, new_cost, neighbor))
+                came_from[neighbor] = current
 
     # No path found
     return []
 
-
-# Selector function to choose which algorithm to use
-def find_path(start, goal, algorithm="a_star"):
-    if algorithm == "a_star":
-        return a_star(start, goal)
-    else:
-        # Raise error if unknown algorithm requested
-        raise ValueError(f"Unknown algorithm: {algorithm}")
