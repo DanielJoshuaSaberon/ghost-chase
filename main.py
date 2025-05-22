@@ -1,11 +1,11 @@
 import pygame
-from maze import ROWS, COLS, TILE_SIZE, draw_maze
+from maze import ROWS, COLS, TILE_SIZE, draw_maze, ROWS, COLS
 from player import Player
 from ghost import Ghost
-from menu import show_menu, show_game_over # screens
+from menu import show_menu, show_game_over
 
 # Set frame rate for the game
-FPS = 10
+FPS = 5
 
 # Game states
 MENU = "menu"
@@ -23,7 +23,7 @@ def game_loop(win):
     """
     clock = pygame.time.Clock()
     player = Player(1, 1)  # Starting position of the player
-    ghost = Ghost(13, 13)  # Starting position of the ghost
+    ghost = Ghost(ROWS-2 , COLS-2)  # Starting position of the ghost
     frame_count = 0
     ghost_move_delay = 3  # Delay ghost movement every few frames
     game_over = False
@@ -85,14 +85,14 @@ def main():
     Starts with menu, then enters the game loop.
     """
     pygame.init()
-    WIN = pygame.display.set_mode((COLS * TILE_SIZE, ROWS * TILE_SIZE))
+    Window = pygame.display.set_mode((COLS * TILE_SIZE, ROWS * TILE_SIZE))
     pygame.display.set_caption("Pac-Man Style Chase")
 
     state = MENU  # Initial state is the main menu
 
     while True:
         if state == MENU:
-            show_menu(WIN)  # Display the menu screen
+            show_menu(Window)  # Display the menu screen
             while True:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -105,7 +105,7 @@ def main():
                     break
 
         elif state == GAME:
-            state = game_loop(WIN)  # Play game and return new state
+            state = game_loop(Window)  # Play game and return new state
 
 
 if __name__ == "__main__":
