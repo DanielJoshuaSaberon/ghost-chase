@@ -11,7 +11,6 @@ FPS = 20
 MENU = "menu"
 GAME = "game"
 
-
 def game_loop(win):
     """
     Main game loop where all the game logic runs:
@@ -65,6 +64,9 @@ def game_loop(win):
             # Check collision: if ghost occupies same grid tile as player
             if ghost.row == player.row and ghost.col == player.col:
                 game_over = True  # Set game over flag
+                pygame.mixer.music.stop()
+                pygame.mixer.music.load("public/gameover.wav")
+                pygame.mixer.music.play()
 
         # Drawing section — render everything on screen
         win.fill((0, 0, 0))    # Clear the screen to black before drawing new frame
@@ -81,8 +83,14 @@ def game_loop(win):
                         return MENU  # Player closes window, return to menu
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_r:
+                            pygame.mixer.music.stop()
+                            pygame.mixer.music.load("public/bgMusic.mp3")
+                            pygame.mixer.music.play(-1)
                             return GAME  # Restart game on pressing 'r'
                         elif event.key == pygame.K_q:
+                            pygame.mixer.music.stop()
+                            pygame.mixer.music.load("public/bgMusic.mp3")
+                            pygame.mixer.music.play(-1)
                             return MENU  # Quit to menu on pressing 'q'
 
         # Update the full display surface to the screen
@@ -97,6 +105,11 @@ def main():
     - Controls game state flow between menu and gameplay
     """
     pygame.init()  # Initialize all pygame modules
+
+    pygame.mixer.init()
+    pygame.mixer.music.load("public/bgMusic.mp3")
+    pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.play(-1)
 
     # Load and set game window icon (small image displayed on the window)
     icon = pygame.image.load("public/ghostChaseLogo.png")
