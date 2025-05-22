@@ -64,9 +64,9 @@ def game_loop(win):
             # Check collision: if ghost occupies same grid tile as player
             if ghost.row == player.row and ghost.col == player.col:
                 game_over = True  # Set game over flag
-                pygame.mixer.music.stop()
-                pygame.mixer.music.load("public/gameover.wav")
-                pygame.mixer.music.play()
+                pygame.mixer.music.stop()  # Stop background music
+                pygame.mixer.music.load("public/gameover.wav")  # Load game over sound
+                pygame.mixer.music.play()  # Play game over sound
 
         # Drawing section — render everything on screen
         win.fill((0, 0, 0))    # Clear the screen to black before drawing new frame
@@ -76,25 +76,19 @@ def game_loop(win):
 
         # If the game is over, show the game over screen and wait for user input
         if game_over:
-            show_game_over(win)  # Display game over message/instructions
-            while True:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        return MENU  # Player closes window, return to menu
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_r:
-                            pygame.mixer.music.stop()
-                            pygame.mixer.music.load("public/bgMusic.mp3")
-                            pygame.mixer.music.play(-1)
-                            return GAME  # Restart game on pressing 'r'
-                        elif event.key == pygame.K_q:
-                            pygame.mixer.music.stop()
-                            pygame.mixer.music.load("public/bgMusic.mp3")
-                            pygame.mixer.music.play(-1)
-                            return MENU  # Quit to menu on pressing 'q'
+            choice = show_game_over(win)  # Display game over menu and get selection
+            pygame.mixer.music.stop()  # Stop game over music
+            pygame.mixer.music.load("public/bgMusic.mp3")  # Reload background music
+            pygame.mixer.music.play(-1)  # Play background music in loop
+
+            if choice == "Retry":
+                return GAME  # Restart game
+            elif choice == "Quit to Menu":
+                return MENU  # Quit to menu
 
         # Update the full display surface to the screen
         pygame.display.update()
+
 
 
 def main():

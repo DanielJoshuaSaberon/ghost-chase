@@ -45,7 +45,53 @@ def show_menu(win):
 
 
 def show_game_over(win):
-    win.fill(BG_COLOR)
-    draw_text(win, "Game Over! The ghost caught you.", (255, 0, 0), 30, -20)
-    draw_text(win, "Press R to Retry or Q to Quit", (255, 255, 255), 25, 30)
-    pygame.display.update()
+    """
+    Displays the game over screen with selectable options.
+    Allows the player to choose between retrying the game or quitting to the menu.
+
+    Args:
+        win (pygame.Surface): The pygame window surface to draw on
+
+    Returns:
+        str: The selected option ("Retry" or "Quit to Menu")
+    """
+    from maze import TILE_SIZE, COLS, ROWS
+    BG_COLOR = (6, 7, 15)  # Background color
+    options = ["Retry", "Quit to Menu"]  # Menu options
+    selected = 0  # Currently selected option index
+    clock = pygame.time.Clock()
+
+    def draw_text(win, message, color, size, y_offset=0):
+        """
+        Helper function to draw centered text with vertical offset
+        """
+        font = pygame.font.SysFont("Arial", size)
+        text = font.render(message, True, color)
+        rect = text.get_rect(center=(COLS * TILE_SIZE // 2, ROWS * TILE_SIZE // 2 + y_offset))
+        win.blit(text, rect)
+
+    # Game over menu loop
+    while True:
+        win.fill(BG_COLOR)  # Clear screen
+        draw_text(win, "Game Over! The ghost caught you.", (255, 0, 0), 30, -60)  # Title message
+
+        # Draw all menu options, highlighting the selected one
+        for i, option in enumerate(options):
+            color = (0, 102, 204) if i == selected else (255, 255, 255)  # Blue highlight
+            draw_text(win, option, color, 26, 20 + i * 40)
+
+        pygame.display.update()  # Refresh display
+        clock.tick(60)  # Cap at 60 FPS
+
+        # Handle user input for navigating and selecting options
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    selected = (selected - 1) % len(options)  # Move selection up
+                elif event.key == pygame.K_DOWN:
+                    selected = (selected + 1) % len(options)  # Move selection down
+                elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
+                    return options[selected]  # Return selected option
