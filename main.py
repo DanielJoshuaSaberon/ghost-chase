@@ -35,7 +35,7 @@ def game_loop(win):
     escaped = False  # Flag to track if player escaped
 
     # Timer setup: 20 seconds countdown
-    total_time = 20  # seconds
+    total_time = 5  # seconds
     start_ticks = pygame.time.get_ticks()  # Start time in milliseconds
 
     font = pygame.font.SysFont("Arial", 24)  # Font for displaying timer

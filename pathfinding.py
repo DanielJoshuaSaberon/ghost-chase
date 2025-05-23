@@ -51,6 +51,7 @@ def a_star(start, goal):
     # Dictionary to track the path: which cell each visited cell came from
     # For the start cell, no previous cell, so value is None
     came_from = {start: None}
+    # (1,0) = (0,0)
 
     # Dictionary to track the cost (distance) to reach each visited cell from start
     # Cost to reach start is zero

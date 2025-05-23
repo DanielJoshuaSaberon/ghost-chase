@@ -5,7 +5,7 @@ TILE_SIZE = 40
 
 # Colors used for drawing the maze tiles
 BG_COLOR = (0, 0, 0)  # Black color for empty spaces where player and ghost can move
-WALL_COLOR = (0, 0, 255)  # Blue color for walls that block movement
+WALL_COLOR = (0, 0, 255)  # Blxue color for walls that block movement
 
 # Maze dimensions: 15 rows and 15 columns, making it a 15x15 grid
 ROWS, COLS = 20, 20
