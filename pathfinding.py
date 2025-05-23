@@ -7,9 +7,9 @@ def manhattan_distance(point_a, point_b):
     #Manhattan distance is to estimate how far two points are from each other on a grid
     #This distance is the sum of horizontal and vertical moves needed.
 
-      #1     #2    #(1,2)
+      #4     #1    #(4,1)
     row_a, col_a = point_a
-      #2     #3    #(2,3)
+      #6     #3    #(6,3)
     row_b, col_b = point_b
     return abs(row_a - row_b) + abs(col_a - col_b)
 
@@ -45,36 +45,47 @@ def get_walkable_neighbors(current_cell):
 
 # A* algorithm to find the shortest path from start to goal in a maze
 def a_star(start, goal):
-    # List of cells to check: (priority, cost_so_far, current_cell)
+    # Frontier: list of cells to explore, each as (priority = cost + heuristic, cost so far, cell)
     toBeExplored = [(manhattan_distance(start, goal), 0, start)]
 
-    # Track how we got to each cell
+    # Dictionary to track the path: which cell each visited cell came from
+    # For the start cell, no previous cell, so value is None
     came_from = {start: None}
-    # Track cost to reach each cell
+
+    # Dictionary to track the cost (distance) to reach each visited cell from start
+    # Cost to reach start is zero
     cost_so_far = {start: 0}
 
     while toBeExplored:
-        # Pick cell with lowest total estimated cost
+        # Sort frontier by priority (lowest first), then pick the best candidate
         toBeExplored.sort()
         x, cost, current = toBeExplored.pop(0)
 
-        # Goal reached, build path
+        # If current cell is the goal, reconstruct and return the path
         if current == goal:
             path = []
             while current:
-                path.append(current)
-                current = came_from[current]
-            return path[::-1]  # Reverse path
+                path.append(current)           # Add current cell to path
+                current = came_from[current]   # Move to previous cell
+            return path[::-1]  # Reverse path to get start -> goal order
 
-        # Check neighbors of the current cell
+        # Explore each walkable neighbor of the current cell
         for neighbor in get_walkable_neighbors(current):
-            new_cost = cost + 1  # Assume each move costs 1
+            new_cost = cost + 1  # Cost to move to neighbor (assumed to be 1)
 
+            # If neighbor is not visited or a cheaper path is found
             if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
-                cost_so_far[neighbor] = new_cost
+                cost_so_far[neighbor] = new_cost  # Update cost to reach neighbor
+
+                # Calculate priority = cost so far + heuristic estimate to goal
                 priority = new_cost + manhattan_distance(neighbor, goal)
+
+                # Add neighbor to frontier to be explored later
                 toBeExplored.append((priority, new_cost, neighbor))
+
+                # Record that we reached neighbor from current
                 came_from[neighbor] = current
+
 
     # No path found
     return []

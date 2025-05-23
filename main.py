@@ -28,7 +28,7 @@ def game_loop(win):
     player = Player(1, 1)  # Initialize player position
     ghost = Ghost(ROWS - 2, COLS - 2)  # Initialize ghost position
     frame_count = 0
-    ghost_move_delay = 6   #  delay to slow down ghost movement
+    ghost_move_delay = 5  #  delay to slow down ghost movement
     player_move_delay = 2  #  delay for slowing down player movement
     last_player_move_frame = 0
     game_over = False

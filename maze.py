@@ -1,7 +1,7 @@
 import pygame
 
 # Size of each tile in pixels (width and height of each maze cell)
-TILE_SIZE = 50
+TILE_SIZE = 40
 
 # Colors used for drawing the maze tiles
 BG_COLOR = (0, 0, 0)  # Black color for empty spaces where player and ghost can move
